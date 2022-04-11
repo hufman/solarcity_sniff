@@ -1,0 +1,11 @@
+[Unit]
+Description=Sniff Zigbee traffic from Solarcity panels
+
+[Service]
+ExecStart=/opt/solarcity_sniff/sniff_main.sh
+WorkingDirectory=/opt/solarcity_sniff
+User=hufman
+
+[Install]
+WantedBy=multi-user.target
+
