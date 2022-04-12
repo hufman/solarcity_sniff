@@ -1,0 +1,27 @@
+name: "Solarcity Sniffer"
+description: "Sniff Zigbee traffic from Solarcity panels"
+version: "0.1.0"
+slug: "solarcity_sniffer"
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+url: "https://github.com/hufman/solarcity_sniff"
+
+map:
+  - 'share:rw'
+tmpfs: true
+usb: true
+services:
+  - "mqtt:want"
+
+options:
+  mqtt_broker: "mqtt://core-mosquitto:1883"
+schema:
+  save_capture: bool?
+  capture_interval: int?
+  mqtt_broker: str
+  mqtt_username: str?
+  mqtt_password: password?

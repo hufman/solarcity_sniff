@@ -1,0 +1,18 @@
+#!/usr/bin/with-contenv bashio
+
+bashio::log.info "Starting mqtt publisher"
+
+mqtt_broker="$(bashio::config 'mqtt_broker')"
+mqtt_username="$(bashio::config 'mqtt_username')"
+mqtt_password="$(bashio::config 'mqtt_password')"
+if $(echo "$mqtt_broker" | grep -q core-mosquitto) && bashio::var.has_value "$(bashio::services mqtt)"; then
+	if bashio::var.true "$(bashio::services 'mqtt' 'ssl')"; then
+		mqtt_broker="mqtts://$(bashio::services 'mqtt' 'host'):$(bashio::services 'mqtt' 'port')"
+	else
+		mqtt_broker="mqtt://$(bashio::services 'mqtt' 'host'):$(bashio::services 'mqtt' 'port')"
+	fi
+	mqtt_username="$(bashio::services 'mqtt' 'username')"
+	mqtt_password="$(bashio::services 'mqtt' 'password')"
+fi
+
+exec python3 /mqtt.py -f /tmp/capture.pcap --mqtt-broker "$mqtt_broker" --mqtt-username "$mqtt_username" --mqtt-password "$mqtt_password"
