@@ -14,9 +14,6 @@ xsltproc pdml.xslt - | while read packet; do
     timestamp=$(echo $packet | awk '{print $1}' | awk -F: '{print $2}' | awk -F. '{print $1}')
     data=$(echo $packet | awk '{print $2}' | awk -F: '{print $2}')
     if [[ "$data" == 01036800* ]]; then
-        energy=${data:102:8}
-        power=${data:62:4}
-        printf "%s %d\n" $timestamp $((16#$power)) $((16#$energy))
+        printf "%s %s\n" $timestamp $data
     fi
 done
-

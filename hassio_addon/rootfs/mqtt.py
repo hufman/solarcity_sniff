@@ -87,7 +87,6 @@ def parse_filename(filename):
 
 def parse_registration(src_address, data):
 	node_id = f"solarcity_{src_address}"
-	topic = f"homeassistant/sensor/{node_id}/{node_id}_power/config"
 
 	def decode(b):
 		decode = lambda b: bytes.fromhex(b).rstrip(b'\0').decode('utf-8')
@@ -103,6 +102,19 @@ def parse_registration(src_address, data):
 		model = model,
 		sw_version = fw_version,
 	)
+	energy_topic = f"homeassistant/sensor/{node_id}/{node_id}_energy/config"
+	energy_body = dict(
+		device = device_body,
+		name = "Solarcity Inverter Energy",
+		unit_of_measurement = "kWh",
+		state_class = "total_increasing",
+		device_class = "energy",
+		object_id = f"{node_id}_energy",
+		unique_id = f"{node_id}_energy",
+		state_topic = f"zigbee/{node_id}/{node_id}_energy",
+	)
+	mqtt_client.publish(energy_topic, json.dumps(energy_body), retain=True)
+	power_topic = f"homeassistant/sensor/{node_id}/{node_id}_power/config"
 	power_body = dict(
 		device = device_body,
 		name = "Solarcity Inverter Power",
@@ -113,11 +125,13 @@ def parse_registration(src_address, data):
 		unique_id = f"{node_id}_power",
 		state_topic = f"zigbee/{node_id}/{node_id}_power",
 	)
-	mqtt_client.publish(topic, json.dumps(power_body), retain=True)
+	mqtt_client.publish(power_topic, json.dumps(power_body), retain=True)
 
 def parse_report(src_address, data):
 	node_id = f"solarcity_{src_address}"
 	power = int(data[62:66], 16)
 	mqtt_client.publish(f"zigbee/{node_id}/{node_id}_power", power, retain=True)
+	energy = int(data[102:110], 16) / 1000.0
+	mqtt_client.publish(f"zigbee/{node_id}/{node_id}_energy", energy, retain=True)
 
 watch_filename(args.filename)
